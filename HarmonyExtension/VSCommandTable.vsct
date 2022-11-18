@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<Extern href="stdidcmd.h"/>
+	<Extern href="vsshlids.h"/>
+	<Include href="KnownImageIds.vsct"/>
+	<Include href="VSGlobals.vsct"/>
+
+	<Commands package="HarmonyExtension">
+		<Groups>
+			<Group guid="HarmonyExtension" id="HarmonyMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+			</Group>
+		</Groups>
+
+		<!--This section defines the elements the user can interact with, like a menu command or a button
+        or combo box in a toolbar. -->
+		<Buttons>
+			<Button guid="HarmonyExtension" id="PrefixCommand" priority="0x0100" type="Button">
+				<Parent guid="HarmonyExtension" id="HarmonyMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="CopyItem" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Copy as Harmony Prefix...</ButtonText>
+					<LocCanonicalName>.HarmonyExtension.MyCommand</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="HarmonyExtension" id="PostfixCommand" priority="0x0100" type="Button">
+				<Parent guid="HarmonyExtension" id="HarmonyMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="Copy" />
+				<!--<Icon guid="ImageCatalogGuid" id="StatusInformation" />-->
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Copy as Harmony Postfix...</ButtonText>
+					<LocCanonicalName>.HarmonyExtension.MyCommand</LocCanonicalName>
+				</Strings>
+			</Button>
+		</Buttons>
+	</Commands>
+
+	<Symbols>
+		<GuidSymbol name="HarmonyExtension" value="{802359e0-57a5-4a96-b5c1-5b4a4532c99a}">
+			<IDSymbol name="HarmonyMenuGroup" value="0x0001" />
+			<IDSymbol name="PrefixCommand" value="0x0100" />
+			<IDSymbol name="PostfixCommand" value="0x0101" />
+		</GuidSymbol>
+	</Symbols>
+</CommandTable>
