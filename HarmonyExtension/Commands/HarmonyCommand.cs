@@ -8,7 +8,7 @@ namespace HarmonyExtension
     {
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            await HarmonyHandler.Instance.Button_CopyAsHarmony(this, e);
+            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Prefix = true });
         }
     }
 
@@ -17,11 +17,7 @@ namespace HarmonyExtension
     {
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            await HarmonyHandler.Instance.Button_CopyAsHarmony(this, e);
-            //var textManager = await this.Package.GetServiceAsync(typeof(VsTextManagerClass));
-            //await VS.MessageBox.ShowWarningAsync("HarmonyExtension", "Button clicked");
+            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Postfix = true});
         }
     }
-
-
 }

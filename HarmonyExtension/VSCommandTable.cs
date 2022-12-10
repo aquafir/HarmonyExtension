@@ -20,7 +20,9 @@ namespace HarmonyExtension
     /// </summary>
     internal sealed partial class PackageIds
     {
-        public const int HarmonyMenuGroup = 0x0001;
+        public const int HarmonyMainMenu = 0x0001;
+        public const int HarmonyContextMenu = 0x0002;
+        public const int HarmonyMenuGroup = 0x0010;
         public const int PrefixCommand = 0x0100;
         public const int PostfixCommand = 0x0101;
     }

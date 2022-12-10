@@ -5,11 +5,35 @@
 	<Extern href="vsshlids.h"/>
 	<Include href="KnownImageIds.vsct"/>
 	<Include href="VSGlobals.vsct"/>
+	<!--<VisibilityConstraints></VisibilityConstraints>-->
 
+	<CommandPlacements>
+		<CommandPlacement guid="HarmonyExtension" id="HarmonyMenuGroup" priority="0x07FF">
+			<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
+		</CommandPlacement>
+		<CommandPlacement guid="HarmonyExtension" id="HarmonyMenuGroup" priority="0x07FF">
+			<Parent guid="HarmonyExtension" id="HarmonyMainMenu" />
+		</CommandPlacement>
+	</CommandPlacements>
 	<Commands package="HarmonyExtension">
+		<Menus>
+			<Menu guid="HarmonyExtension" id="HarmonyMainMenu" priority="0x0100" type="Menu">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS" />
+				<!--<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>-->
+				<Strings>
+					<ButtonText>Harmony</ButtonText>
+				</Strings>
+			</Menu>
+			<!--Not working-->
+			<!--<Menu guid="HarmonyExtension" id="HarmonyContextMenu" priority="0x0100" type="Menu">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+				<Strings>
+					<ButtonText>Harmony</ButtonText>
+				</Strings>
+			</Menu>-->
+		</Menus>
 		<Groups>
 			<Group guid="HarmonyExtension" id="HarmonyMenuGroup" priority="0x0600">
-				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
 			</Group>
 		</Groups>
 
@@ -18,7 +42,7 @@
 		<Buttons>
 			<Button guid="HarmonyExtension" id="PrefixCommand" priority="0x0100" type="Button">
 				<Parent guid="HarmonyExtension" id="HarmonyMenuGroup" />
-				<Icon guid="ImageCatalogGuid" id="CopyItem" />
+				<Icon guid="ImageCatalogGuid" id="Copy" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Copy as Harmony Prefix...</ButtonText>
@@ -28,7 +52,6 @@
 			<Button guid="HarmonyExtension" id="PostfixCommand" priority="0x0100" type="Button">
 				<Parent guid="HarmonyExtension" id="HarmonyMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="Copy" />
-				<!--<Icon guid="ImageCatalogGuid" id="StatusInformation" />-->
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Copy as Harmony Postfix...</ButtonText>
@@ -38,9 +61,22 @@
 		</Buttons>
 	</Commands>
 
+	<KeyBindings>
+		<KeyBinding guid="HarmonyExtension" id="PrefixCommand"
+					key1="K" mod1="Control Shift"
+					key2="P" mod2="Control Shift"
+					editor="guidVSStd97" />
+		<KeyBinding guid="HarmonyExtension" id="PostfixCommand"
+					key1="K" mod1="Control Shift"
+					key2="O" mod2="Control Shift"
+					editor="guidVSStd97" />
+	</KeyBindings>
+
 	<Symbols>
 		<GuidSymbol name="HarmonyExtension" value="{802359e0-57a5-4a96-b5c1-5b4a4532c99a}">
-			<IDSymbol name="HarmonyMenuGroup" value="0x0001" />
+			<IDSymbol name="HarmonyMainMenu" value="0x0001"/>
+			<IDSymbol name="HarmonyContextMenu" value="0x0002" />
+			<IDSymbol name="HarmonyMenuGroup" value="0x0010" />
 			<IDSymbol name="PrefixCommand" value="0x0100" />
 			<IDSymbol name="PostfixCommand" value="0x0101" />
 		</GuidSymbol>

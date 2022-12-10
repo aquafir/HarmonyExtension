@@ -1,8 +1,9 @@
 ﻿using EnvDTE;
-
+using EnvDTE80;
 using Microsoft;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
@@ -11,14 +12,14 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
-
+using Microsoft.VisualStudio.VCProjectEngine;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Forms;
 
 namespace HarmonyExtension.Commands;
 
@@ -72,12 +73,12 @@ internal class HarmonyHandler
 
     public HarmonyHandler(Package package)
     {
-        ThreadHelper.ThrowIfNotOnUIThread();
         try
         {
             _package = package ?? throw new ArgumentNullException(nameof(package));
 
-            if(ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService) {
+            if (ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
+            {
 
             }
 
@@ -89,15 +90,22 @@ internal class HarmonyHandler
 
             _editorAdaptersFactory = _componentModel.GetService<IVsEditorAdaptersFactoryService>();
             Assumes.Present(_editorAdaptersFactory);
+
+            //_dte = _componentModel.GetService<DTE>();
+            //Assumes.Present(_dte);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            System.Windows.Forms.MessageBox.Show($"Some error in Harmony extension.\n Please take screenshot and create issue on github with this error\n{ex}", "[HarmonyExtension] Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            throw;
+        }
     }
 
-    public async Task Button_CopyAsHarmony(object sender, EventArgs e)
+    public async Task Button_CopyAsHarmony(HarmonyOptions options)
     {
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
         try
-        {          
+        {
             var textView = GetTextView();
             if (textView == null)
             {
@@ -105,7 +113,7 @@ internal class HarmonyHandler
                 return;
             }
             SnapshotPoint caretPosition = textView.Caret.Position.BufferPosition;
-            
+
             Microsoft.CodeAnalysis.Document document = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
             if (document == null)
             {
@@ -119,9 +127,9 @@ internal class HarmonyHandler
                 _statusBar.SetText("Can't get a syntax root node");
                 return;
             }
+
             SyntaxToken st = rootSyntaxNode.FindToken(caretPosition);
             SemanticModel? semanticModel = await document.GetSemanticModelAsync().ConfigureAwait(true);
-
             if (semanticModel == null)
             {
                 _statusBar.SetText("Can't get a semantic model");
@@ -135,25 +143,31 @@ internal class HarmonyHandler
             ISymbol? symbol = null;
             var parentKind = st.Parent.Kind();
 
+            
+            var c = semanticModel.GetSymbolInfo(st.Parent);
+            var sym = c.Symbol as IMethodSymbol;
+
+
+
             if (st.Kind() == SyntaxKind.IdentifierToken && (
                    parentKind == SyntaxKind.PropertyDeclaration
-                || parentKind == SyntaxKind.FieldDeclaration
                 || parentKind == SyntaxKind.MethodDeclaration
-                || parentKind == SyntaxKind.NamespaceDeclaration
-                || parentKind == SyntaxKind.DestructorDeclaration
-                || parentKind == SyntaxKind.ConstructorDeclaration
-                || parentKind == SyntaxKind.OperatorDeclaration
-                || parentKind == SyntaxKind.ConversionOperatorDeclaration
-                || parentKind == SyntaxKind.EnumDeclaration
-                || parentKind == SyntaxKind.EnumMemberDeclaration
-                || parentKind == SyntaxKind.ClassDeclaration
-                || parentKind == SyntaxKind.EventDeclaration
-                || parentKind == SyntaxKind.EventFieldDeclaration
-                || parentKind == SyntaxKind.InterfaceDeclaration
-                || parentKind == SyntaxKind.StructDeclaration
-                || parentKind == SyntaxKind.DelegateDeclaration
-                || parentKind == SyntaxKind.IndexerDeclaration
-                || parentKind == SyntaxKind.VariableDeclarator
+                //|| parentKind == SyntaxKind.ConstructorDeclaration
+                //|| parentKind == SyntaxKind.FieldDeclaration
+                //|| parentKind == SyntaxKind.NamespaceDeclaration
+                //|| parentKind == SyntaxKind.DestructorDeclaration
+                //|| parentKind == SyntaxKind.OperatorDeclaration
+                //|| parentKind == SyntaxKind.ConversionOperatorDeclaration
+                //|| parentKind == SyntaxKind.EnumDeclaration
+                //|| parentKind == SyntaxKind.EnumMemberDeclaration
+                //|| parentKind == SyntaxKind.ClassDeclaration
+                //|| parentKind == SyntaxKind.EventDeclaration
+                //|| parentKind == SyntaxKind.EventFieldDeclaration
+                //|| parentKind == SyntaxKind.InterfaceDeclaration
+                //|| parentKind == SyntaxKind.StructDeclaration
+                //|| parentKind == SyntaxKind.DelegateDeclaration
+                //|| parentKind == SyntaxKind.IndexerDeclaration
+                //|| parentKind == SyntaxKind.VariableDeclarator
                 ))
             {
                 symbol = semanticModel.LookupSymbols(caretPosition.Position, name: st.Text).FirstOrDefault();
@@ -161,6 +175,21 @@ internal class HarmonyHandler
             else
             {
                 SymbolInfo si = semanticModel.GetSymbolInfo(st.Parent);
+
+                var id = (st.Parent as ConstructorDeclarationSyntax);
+                var nodes = st.Parent.ChildNodes();
+                var tokens = st.Parent.ChildTokens();
+
+                var syms = semanticModel.LookupSymbols(caretPosition.Position);
+                //var symbolInfo = semanticModel.GetSymbolInfo(st.Parent);
+                //var constructor = (IMethodSymbol)si.Symbol;
+
+                // Get the SymbolInfo for the constructor
+                //var symbolInfo = si.Symbol;
+
+                // Get the MethodInfo for the constructor
+                //var constructorInfo = constructor.MethodInfo;
+
                 symbol = si.Symbol ?? si.CandidateSymbols.FirstOrDefault();
             }
             if (symbol == null)
@@ -178,11 +207,16 @@ internal class HarmonyHandler
                 _statusBar.SetText(msg);
                 return;
             }
+            //else if (parentKind == SyntaxKind.ConstructorDeclaration)
+            //{
+
+            //}
+
 
             if (typeSymbol == null)
                 return;
 
-            string typeNamespace = GetFullNamespace(typeSymbol);
+            //string typeNamespace = GetFullNamespace(typeSymbol);
             //string typeName = typeNamespace + "." + typeSymbol.MetadataName;
             var typeName = typeSymbol.FriendlyName();
 
@@ -192,40 +226,62 @@ internal class HarmonyHandler
                 return;
             }
 
-            //Get type of command
-            var s = sender as MenuCommand;
-
-            if (s is null)
-                return;
-
-            bool postfix = s.CommandID.ID == PackageIds.PrefixCommand;
-
-            //Set type
-            var sb = new StringBuilder();
-            sb.AppendLine(postfix ? "[HarmonyPostfix]" : "[HarmonyPrefix]");
 
             //Use nameof if accessible
-            var harmonyMemberName = symbol.DeclaredAccessibility.HasFlag(Accessibility.Private) ? $"\"{memberName}\"" : $"nameof({typeName}.{memberName})";
+            var harmonyMemberName = (symbol.DeclaredAccessibility.HasFlag(Accessibility.Private) || !options.PreferNameOf) ?
+                $"\"{memberName}\"" : $"nameof({typeName}.{memberName})";
             var methodSymbol = symbol as IMethodSymbol;
 
             if (methodSymbol is null)
                 return;
 
-            var paramSignature = String.Join(",", methodSymbol.Parameters.Select(p => $"typeof({p.Type.FriendlyName()})"));
-            var paramMethodSignature = String.Join(",", methodSymbol.Parameters.Select(p => $"{p.Type.FriendlyName()} {p.Name}"));
+            var parameters = methodSymbol.Parameters;
+            var paramSignature = String.Join(",", parameters.Select(p => $"typeof({p.Type.FriendlyName()})"));
+            var paramNames = String.Join(",", parameters.Select(p => $"{p.Type.FriendlyName()} {p.Name}"));
 
-            if (postfix)
-                paramMethodSignature += $", ref {typeName} __instance, ref {methodSymbol.ReturnType.FriendlyName()} __result";
+            var returnSignature = !methodSymbol.ReturnsVoid;
+
+            //Set type
+            var sb = new StringBuilder();
+            sb.AppendLine(options.Postfix ? "[HarmonyPostfix]" : "[HarmonyPrefix]");
+            sb.AppendLine($"[HarmonyPatch(typeof({typeName}), {harmonyMemberName}, new Type[] {{ {paramSignature} }})]");
+
+            var optParams = "";
+            if (options.AddInstance)
+                optParams += $", ref {typeName} __instance";
+
+            if (options.Postfix && options.AddResult && !methodSymbol.ReturnsVoid)
+                optParams += $", ref {methodSymbol.ReturnType.FriendlyName()} __result";
+
+            if (parameters.Count() == 0)
+                optParams = optParams.TrimStart(',');
+
+            //Method declaration
+            string returnName, bodyAndComments;
+
+            if (options.Postfix || !options.PreferOverride)
+            {
+                returnName = "void";
+                bodyAndComments = "//Your code here";
+            }
             else
-                paramMethodSignature += $", ref {typeName} __instance";
+            {
+                returnName = "bool";
+                bodyAndComments = """
+                    //Return false to override
+                    //return false;
 
-            sb.AppendLine($"[HarmonyPatch(typeof({typeName}), {harmonyMemberName}, new Type[] {{ {paramSignature} }}]");
-            sb.AppendLine($"public static {(postfix ? "void" : "bool")} {(postfix ? "Post" : "Pre")}{methodSymbol.Name}({paramMethodSignature}) {{\r\n" +
-                $"//Your code here" +
-                $"{(postfix ? "" : "\r\nreturn true; //Return false to override")}" +
-                $"\r\n}}");
+                    //Return true to execute original
+                    return true;
+                    """;
 
-            //System.Windows.Forms.Clipboard.SetText(sb.ToString());
+            }
+            sb.AppendLine($"public static {returnName} {(options.Postfix ? "Post" : "Pre")}{methodSymbol.Name}({paramNames}{optParams}) {{");
+
+            sb.AppendLine(bodyAndComments);
+            sb.AppendLine("}");
+
+            System.Windows.Forms.Clipboard.SetText(sb.ToString());
         }
         catch (Exception ex)
         {
