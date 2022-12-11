@@ -161,7 +161,7 @@ internal class HarmonyHandler
         }
     }
 
-    private async void GetHarmonyPatch(IMethodSymbol symbol, HarmonyOptions options, StringBuilder sb)
+    private void GetHarmonyPatch(IMethodSymbol symbol, HarmonyOptions options, StringBuilder sb)
     {
         var _options = ExtensionOptions.Instance;
         var parameters = symbol.Parameters;
