@@ -1,3 +1,6 @@
+# HarmonyExtension
+This is a Visual Studio extension that adds commands for copying a Harmony patch implementation to clipboard an IMethod or IProperty symbol.
+
 ### Todo
 
 * [Visual Studio Extension](https://learn.microsoft.com/en-us/visualstudio/extensibility/vsix/get-started/get-started-guide?view=vs-2022)
