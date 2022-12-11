@@ -1,5 +1,4 @@
 ﻿using HarmonyExtension.Commands;
-using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace HarmonyExtension
 {
