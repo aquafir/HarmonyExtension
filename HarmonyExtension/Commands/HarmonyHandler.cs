@@ -1,29 +1,18 @@
-﻿using EnvDTE;
-using EnvDTE80;
-using Microsoft;
+﻿using Microsoft;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
-using Microsoft.VisualStudio.VCProjectEngine;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace HarmonyExtension.Commands;
@@ -142,111 +131,26 @@ internal class HarmonyHandler
                 return;
             }
 
-            var symbol = semanticModel.LookupSymbols(caretPosition.Position, name: st.Text).FirstOrDefault();
-            var node = st.Parent;
-            
-            //Try to get the method
+            //Try to get the method(s)
+//            var node = st.Parent;
             List<IMethodSymbol> methodSymbols = new();
-            //IPropertySymbol propertySymbol = st.Parent as IPropertySymbol;
-            //propertySymbol = symbol as IPropertySymbol;
 
-
-            if(!TryGetMethodSymbols(semanticModel, node, ref methodSymbols) || methodSymbols.Count == 0) {
+            if (!TryGetMethodSymbols(semanticModel, st.Parent, ref methodSymbols) || methodSymbols.Count == 0)
+            {
                 _statusBar.SetText("Can't find methods");
                 return;
             }
 
-
             var sb = new StringBuilder();
             foreach (var methodSymbol in methodSymbols)
             {
-
                 if (methodSymbol is null)
                 {
                     _statusBar.SetText("Can't get parent node");
                     return;
                 }
 
-
-
-                string? memberName = null;
-                MemberType memberType = 0;
-
-                if (symbol == null || !TryHandleAsMember(symbol, out var typeSymbol, out memberName, out memberType))
-                {
-                    var msg = $"{st.Text} is not a valid identifier. token: {st}, Kind: {st.Kind()}";
-                    _statusBar.SetText(msg);
-                    return;
-                }
-                //else if (parentKind == SyntaxKind.ConstructorDeclaration)
-                //{
-
-                //}
-
-
-                if (typeSymbol == null)
-                    return;
-
-                //string typeNamespace = GetFullNamespace(typeSymbol);
-                //string typeName = typeNamespace + "." + typeSymbol.MetadataName;
-                var typeName = typeSymbol.FriendlyName();
-
-                if (!(memberType == MemberType.Property || memberType == MemberType.Method))
-                {
-                    _statusBar.SetText($"Harmony only creates a template for properties or methods.  {typeName}.{memberName} is {memberType}");
-                    return;
-                }
-
-
-                //Use nameof if accessible
-                var harmonyMemberName = (symbol.DeclaredAccessibility.HasFlag(Accessibility.Private) || !options.PreferNameOf) ?
-                    $"\"{memberName}\"" : $"nameof({typeName}.{memberName})";
-
-
-                var parameters = methodSymbol.Parameters;
-                var paramSignature = String.Join(",", parameters.Select(p => $"typeof({p.Type.FriendlyName()})"));
-                var paramNames = String.Join(",", parameters.Select(p => $"{p.Type.FriendlyName()} {p.Name}"));
-
-                var returnSignature = !methodSymbol.ReturnsVoid;
-
-                //Set type
-                sb.AppendLine(options.Postfix ? "[HarmonyPostfix]" : "[HarmonyPrefix]");
-                sb.AppendLine($"[HarmonyPatch(typeof({typeName}), {harmonyMemberName}, new Type[] {{ {paramSignature} }})]");
-
-                var optParams = "";
-                if (options.AddInstance)
-                    optParams += $", ref {typeName} __instance";
-
-                if (options.Postfix && options.AddResult && !methodSymbol.ReturnsVoid)
-                    optParams += $", ref {methodSymbol.ReturnType.FriendlyName()} __result";
-
-                if (parameters.Count() == 0)
-                    optParams = optParams.TrimStart(',');
-
-                //Method declaration
-                string returnName, bodyAndComments;
-
-                if (options.Postfix || !options.PreferOverride)
-                {
-                    returnName = "void";
-                    bodyAndComments = "//Your code here";
-                }
-                else
-                {
-                    returnName = "bool";
-                    bodyAndComments = """
-                    //Return false to override
-                    //return false;
-
-                    //Return true to execute original
-                    return true;
-                    """;
-
-                }
-                sb.AppendLine($"public static {returnName} {(options.Postfix ? "Post" : "Pre")}{methodSymbol.Name}({paramNames}{optParams}) {{");
-
-                sb.AppendLine(bodyAndComments);
-                sb.AppendLine("}");
+                GetHarmonyPatch(methodSymbol, options, sb);
             }
 
             System.Windows.Forms.Clipboard.SetText(sb.ToString());
@@ -257,14 +161,130 @@ internal class HarmonyHandler
         }
     }
 
-    private bool TryGetMethodSymbols(SemanticModel semanticModel, SyntaxNode node, ref List<IMethodSymbol> methodSymbols, int depth = 2)
+    private async void GetHarmonyPatch(IMethodSymbol symbol, HarmonyOptions options, StringBuilder sb)
     {
+        var _options = ExtensionOptions.Instance;
+        var parameters = symbol.Parameters;
+        var typeName = symbol.ContainingType.GetFriendlyName();
+        var methodName = symbol.GetHarmonyName();
 
-        var propSymbol = node as IPropertySymbol;
+        //Type array to match methods
+        var harmonyParamSignature = $"new Type[] {{ {String.Join(",", parameters.Select(p => $"typeof({p.Type.GetFriendlyName()})"))} }}";
 
-        if(propSymbol  != null)
+        //Use nameof if accessible and preferred
+        var originalMethodName = (symbol.DeclaredAccessibility.HasFlag(Accessibility.Private) || !_options.PreferNameOf) ?
+            $"\"{methodName}\"" : $"nameof({typeName}.{methodName})";
+
+        //What the generated method gets called
+        var methodDeclarationName = options.Postfix switch
         {
-            if(propSymbol.GetMethod != null)
+            true when symbol.IsConstructor() => "PostCtor_" + methodName,
+            true when symbol.IsGetter() => "PostGet_" + methodName,
+            true when symbol.IsSetter() => "PostSet_" + methodName,
+            false when symbol.IsConstructor() => "PreCtor_" + methodName,
+            false when symbol.IsGetter() => "PreGet_" + methodName,
+            false when symbol.IsSetter() => "PreSet_" + methodName,
+            true => "Post" + methodName,
+            false => "Pre" + methodName,            
+        };           
+
+        //Optional injected parameters for method signature
+        List<string> injections = new();
+        if (_options.AddInstance)
+            injections.Add($"ref {typeName} __instance");
+
+        if (_options.AddResult && !symbol.ReturnsVoid) //options.Postfix && 
+            injections.Add($"ref {symbol.ReturnType.GetFriendlyName()} __result");
+
+        //Add either manual patching usage or annotations
+        if (_options.ManualPatch)
+        {
+            sb.AppendLine(
+                $$"""
+                var original = AccessTools.Method(typeof({{typeName}}), {{originalMethodName}});
+                var patchMethod = AccessTools.Method(typeof(PatchClass), nameof(PatchClass.{{methodDeclarationName}}), {{harmonyParamSignature}});
+                var patch = new HarmonyMethod(patchMethod);
+                harmony.Patch(original, {{ (options.Postfix ? "postfix" : "prefix")}}: patch);
+                """);
+        }
+        else
+        {
+            //Patch type
+            sb.AppendLine(options.Postfix ? "[HarmonyPostfix]" : "[HarmonyPrefix]");
+
+            //Build annotations
+            List<string> annotations = new() {
+                $"typeof({typeName})"
+            };
+
+            //Method type annotation.  Todo: verify get/set/ctor
+            if (symbol.IsGetter())
+                annotations.Add("MethodType.Getter");
+            if (symbol.IsSetter())
+                annotations.Add("MethodType.Setter");
+            if (symbol.IsConstructor())
+                annotations.Add("MethodType.Constructor");
+            //MethodType.Normal, MethodType.StaticConstructor, MethodType.Enumerator
+
+            if (!symbol.IsConstructor())
+                annotations.Add(originalMethodName);
+
+            if (parameters.Count() != 0 || _options.IncludeEmptyParameterAnnotation)
+                annotations.Add($"{harmonyParamSignature}");
+
+            if (_options.UseSeparateAnnotations)
+            {
+                foreach (var annotation in annotations)
+                {
+                    sb.AppendLine($"[HarmonyPatch({annotation})]");
+                }
+            }
+            else
+            {
+                var mergedAnnotations = String.Join(", ", annotations.Select(x => x));
+                sb.AppendLine($"[HarmonyPatch({mergedAnnotations})]");
+            }
+        }
+
+        //Method body
+        //Types and names in the method parameters
+        var methodSignature = parameters.Select(p => $"{p.Type.GetFriendlyName()} {p.Name}").ToList();
+        var formattedParams = String.Join(",", methodSignature);
+
+        //Harmony return
+        string returnType = options.Postfix || !_options.PreferOverride ? "void" : "bool";
+
+        //Boilerplate for the method
+        string bodyAndComments = options.Postfix || !_options.PreferOverride ?
+            "//Your code here" :
+            """
+            //Return false to override
+            //return false;
+
+            //Return true to execute original
+            return true;
+            """;
+
+        sb.AppendLine(
+            $$"""
+            public static {{returnType}} {{methodDeclarationName}}({{formattedParams}}) {
+            {{bodyAndComments}}
+            }
+            """);
+    }
+
+    private bool TryGetMethodSymbols(SemanticModel semanticModel, SyntaxNode st, ref List<IMethodSymbol> methodSymbols, int depth = 2)
+    {
+        ISymbol symbol = semanticModel.GetDeclaredSymbol(st);
+
+        if (symbol is null)
+            return false;
+
+        var propSymbol = symbol as IPropertySymbol;
+
+        if (propSymbol != null)
+        {
+            if (propSymbol.GetMethod != null)
                 methodSymbols.Add(propSymbol.GetMethod);
 
             if (propSymbol.SetMethod != null)
@@ -273,7 +293,7 @@ internal class HarmonyHandler
             return true;
         }
 
-        var methodSymbol = node as IMethodSymbol;
+        var methodSymbol = symbol as IMethodSymbol;
         if (methodSymbol != null)
         {
             methodSymbols.Add(methodSymbol);
@@ -281,46 +301,10 @@ internal class HarmonyHandler
             return true;
         }
 
-        if (depth < 0 || node.Parent is null)
+        if (depth < 0 || symbol.ContainingSymbol is null)
             return false;
 
-        return TryGetMethodSymbols(node.Parent, ref methodSymbols, depth - 1);
-    }
-
-    private static bool TryHandleAsMember(ISymbol symbol, out INamedTypeSymbol? type, out string? memberName, out MemberType memberType)
-    {        
-        if (symbol is IFieldSymbol fieldSymbol)
-        {
-            type = fieldSymbol.ContainingType;
-            memberName = fieldSymbol.Name;
-            memberType = MemberType.Field;
-        }
-        else if (symbol is IPropertySymbol propSymbol)
-        {
-            type = propSymbol.ContainingType;
-            memberName = propSymbol.Name;
-            memberType = MemberType.Property;
-        }
-        else if (symbol is IMethodSymbol methodSymbol)
-        {
-            type = methodSymbol.ContainingType;
-            memberName = methodSymbol.Name;
-            memberType = MemberType.Method;
-        }
-        else if (symbol is IEventSymbol eventSymbol)
-        {
-            type = eventSymbol.ContainingType;
-            memberName = eventSymbol.Name;
-            memberType = MemberType.Event;
-        }
-        else
-        {
-            type = null;
-            memberName = null;
-            memberType = 0;
-        }
-
-        return type != null;
+        return TryGetMethodSymbols(semanticModel, st.Parent, ref methodSymbols, depth - 1);
     }
 
     private IWpfTextView? GetTextView()
@@ -330,29 +314,5 @@ internal class HarmonyHandler
         if (textManager.GetActiveView(fMustHaveFocus: 0, null, out IVsTextView textView) != 0)
             return null;
         return _editorAdaptersFactory.GetWpfTextView(textView);
-    }
-
-    private static string GetFullNamespace(INamedTypeSymbol typeSymbol)
-    {
-        INamespaceSymbol nsSym = typeSymbol.ContainingNamespace;
-        var sb = new StringBuilder();
-        while (nsSym?.IsGlobalNamespace == false)
-        {
-            if (sb.Length == 0)
-                sb.Append(nsSym.Name);
-            else
-                sb.Insert(0, '.').Insert(0, nsSym.Name);
-            nsSym = nsSym.ContainingNamespace;
-        }
-
-        return sb.ToString();
-    }
-
-    internal enum MemberType
-    {
-        Field = 0,
-        Property = 1,
-        Method = 2,
-        Event = 3,
     }
 }
