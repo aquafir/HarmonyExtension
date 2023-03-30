@@ -249,10 +249,16 @@ internal class HarmonyHandler
         //Method body
         //Types and names in the method parameters
         var methodSignature = parameters.Select(p => $"{p.Type.GetFriendlyName()} {p.Name}").ToList();
+        methodSignature.AddRange(injections);
         var formattedParams = String.Join(",", methodSignature);
+
+        var last = parameters[parameters.Count() - 1];
 
         //Harmony return
         string returnType = options.Postfix || !_options.PreferOverride ? "void" : "bool";
+        var a = last.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var b = last.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        var parts = last.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
         //Boilerplate for the method
         string bodyAndComments = options.Postfix || !_options.PreferOverride ?
