@@ -11,7 +11,7 @@ namespace HarmonyExtension
         public const string Name = "HarmonyExtension";
         public const string Description = @"Adds convenient ways to copy targets for Andreas Pardeike's Harmony.";
         public const string Language = "en-US";
-        public const string Version = "1.0.1";
+        public const string Version = "1.0.2";
         public const string Author = "Company";
         public const string Tags = "";
     }

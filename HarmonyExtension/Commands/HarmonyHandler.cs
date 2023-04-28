@@ -171,7 +171,7 @@ internal class HarmonyHandler
         //Type array to match methods
         var harmonyParamSignature = $"new Type[] {{ {String.Join(",", parameters.Select(p => $"typeof({p.Type.GetFriendlyName()})"))} }}";
 
-        //Use nameof if accessible and preferred
+        //Method name, using nameof if accessible and preferred in options
         var originalMethodName = (symbol.DeclaredAccessibility.HasFlag(Accessibility.Private) || !_options.PreferNameOf) ?
             $"\"{methodName}\"" : $"nameof({typeName}.{methodName})";
 
@@ -217,7 +217,11 @@ internal class HarmonyHandler
                 $"typeof({typeName})"
             };
 
-            //Method type annotation.  Todo: verify get/set/ctor
+            if (!symbol.IsConstructor())
+                annotations.Add(originalMethodName);
+            
+            //Method type annotation.
+            //Todo: verify get/set/ctor
             if (symbol.IsGetter())
                 annotations.Add("MethodType.Getter");
             if (symbol.IsSetter())
@@ -225,9 +229,6 @@ internal class HarmonyHandler
             if (symbol.IsConstructor())
                 annotations.Add("MethodType.Constructor");
             //MethodType.Normal, MethodType.StaticConstructor, MethodType.Enumerator
-
-            if (!symbol.IsConstructor())
-                annotations.Add(originalMethodName);
 
             if (parameters.Count() != 0 || _options.IncludeEmptyParameterAnnotation)
                 annotations.Add($"{harmonyParamSignature}");
@@ -252,13 +253,12 @@ internal class HarmonyHandler
         methodSignature.AddRange(injections);
         var formattedParams = String.Join(",", methodSignature);
 
-        var last = parameters[parameters.Count() - 1];
+        //Parameters?
+        //var last = parameters[parameters.Count() - 1];
+        //var parts = last.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
         //Harmony return
         string returnType = options.Postfix || !_options.PreferOverride ? "void" : "bool";
-        var a = last.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var b = last.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        var parts = last.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
         //Boilerplate for the method
         string bodyAndComments = options.Postfix || !_options.PreferOverride ?
