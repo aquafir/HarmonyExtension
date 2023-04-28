@@ -259,6 +259,9 @@ internal class HarmonyHandler
 
         //Harmony return
         string returnType = options.Postfix || !_options.PreferOverride ? "void" : "bool";
+        var a = last.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var b = last.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        var parts = last.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
         //Boilerplate for the method
         string bodyAndComments = options.Postfix || !_options.PreferOverride ?
