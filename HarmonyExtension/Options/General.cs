@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Internal.VisualStudio.PlatformUI;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace HarmonyExtension
@@ -6,26 +7,16 @@ namespace HarmonyExtension
     internal partial class OptionsProvider
     {
         // Register the options with this attribute on your package class:
-        // [ProvideOptionPage(typeof(OptionsProvider.ExtensionOptionsOptions), "HarmonyExtension", "ExtensionOptions", 0, 0, true, SupportsProfiles = true)]
         [ComVisible(true)]
-        public class ExtensionOptionsOptions : BaseOptionPage<ExtensionOptions> { }
+        public class GeneralOptions : BaseOptionPage<General> { }
+
+        [ComVisible(true)]
+        public class TemplateOptions : BaseOptionPage<Template> { }
     }
 
     //https://www.vsixcookbook.com/recipes/settings-and-options.html
-    public class ExtensionOptions : BaseOptionModel<ExtensionOptions>
+    public class General : BaseOptionModel<General>
     {
-        //[Category("Harmony")]
-        //[DisplayName("General")]
-        //[Description("")]
-        //[DefaultValue(true)]
-        //public bool Prefix { get; set; } = false;
-
-        //[Category("Harmony")]
-        //[DisplayName("General")]
-        //[Description("")]
-        //[DefaultValue(true)]
-        //public bool Postfix { get; set; } = false;
-
         [Category("Harmony")]
         [DisplayName("Manual Patch")]
         [Description("If enabled AccessTools will be used to get the methods for manual patching.  If disabled annotations will be used")]
@@ -36,13 +27,13 @@ namespace HarmonyExtension
         [DisplayName("NameOf")]
         [Description("Prefers using nameof method names when available")]
         [DefaultValue(true)]
-        public bool PreferNameOf { get; set; } = true;     
+        public bool PreferNameOf { get; set; } = true;
 
         [Category("Harmony")]
         [DisplayName("Override")]
         [Description("Defaults to using bool prefixes that can override the method")]
         [DefaultValue(true)]
-        public bool PreferOverride { get; set; } = true;   
+        public bool PreferOverride { get; set; } = true;
 
         [Category("Harmony")]
         [DisplayName("Split Annotations")]
@@ -68,6 +59,31 @@ namespace HarmonyExtension
         [Description("Inject a reference to the return value")]
         [DefaultValue(true)]
         public bool AddResult { get; set; } = true;
-        //State, Fields, Args ignored
+    }
+
+    //Custom options UI for templates: https://www.vsixcookbook.com/recipes/settings-and-options.html#Walkthrough-Create-individual-Options-with-Checkboxes
+    public class Template : BaseOptionModel<Template>
+    {
+        [Category("Template")]
+        [DisplayName("Manual Template")]
+        [Description("Template used for manual patching.")]
+        [DefaultValue("")]
+        public string ManualTemplate { get; set; } = $$"""
+            public static returnType methodDeclarationName(formattedParams) {
+            bodyAndComments
+            }
+            """;
+
+        [Category("Template")]
+        [DisplayName("Attribute Template")]
+        [Description("Template used for attribute-based patching.")]
+        [DefaultValue("")]
+        public string AttributeTemplate { get; set; } = $$"""
+            public static returnType methodDeclarationName(formattedParams) {
+            bodyAndComments
+            }
+            """;
+
+
     }
 }

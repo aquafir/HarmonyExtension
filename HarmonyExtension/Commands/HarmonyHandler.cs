@@ -163,7 +163,7 @@ internal class HarmonyHandler
 
     private void GetHarmonyPatch(IMethodSymbol symbol, HarmonyOptions options, StringBuilder sb)
     {
-        var _options = ExtensionOptions.Instance;
+        var _options = General.Instance;
         var parameters = symbol.Parameters;
         var typeName = symbol.ContainingType.GetFriendlyName();
         var methodName = symbol.GetHarmonyName();
@@ -230,7 +230,9 @@ internal class HarmonyHandler
                 annotations.Add("MethodType.Constructor");
             //MethodType.Normal, MethodType.StaticConstructor, MethodType.Enumerator
 
-            if (parameters.Count() != 0 || _options.IncludeEmptyParameterAnnotation)
+            if(parameters.Count() > 0)
+                annotations.Add($"{harmonyParamSignature}");
+            else if(_options.IncludeEmptyParameterAnnotation && !(symbol.IsGetter() || symbol.IsSetter()))
                 annotations.Add($"{harmonyParamSignature}");
 
             if (_options.UseSeparateAnnotations)
@@ -259,9 +261,6 @@ internal class HarmonyHandler
 
         //Harmony return
         string returnType = options.Postfix || !_options.PreferOverride ? "void" : "bool";
-        var a = last.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var b = last.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        var parts = last.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
         //Boilerplate for the method
         string bodyAndComments = options.Postfix || !_options.PreferOverride ?
