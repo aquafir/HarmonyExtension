@@ -23,7 +23,9 @@ namespace HarmonyExtension
         public const int HarmonyMainMenu = 0x0001;
         public const int HarmonyContextMenu = 0x0002;
         public const int HarmonyMenuGroup = 0x0010;
-        public const int PrefixCommand = 0x0100;
-        public const int PostfixCommand = 0x0101;
+        public const int AnnotatedPrefixCommand = 0x0100;
+        public const int AnnotatedPostfixCommand = 0x0101;
+        public const int ManualPrefixCommand = 0x0110;
+        public const int ManualPostfixCommand = 0x0111;
     }
 }

@@ -40,36 +40,53 @@
 		<!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
 		<Buttons>
-			<Button guid="HarmonyExtension" id="PrefixCommand" priority="0x0100" type="Button">
+			<Button guid="HarmonyExtension" id="AnnotatedPrefixCommand" priority="0x0100" type="Button">
 				<Parent guid="HarmonyExtension" id="HarmonyMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="Copy" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>Copy as Harmony Prefix...</ButtonText>
-					<LocCanonicalName>.HarmonyExtension.MyCommand</LocCanonicalName>
+					<ButtonText>Copy as Annotated Prefix...</ButtonText>
+					<LocCanonicalName>.HarmonyExtension.AnnotatedPrefix</LocCanonicalName>
 				</Strings>
 			</Button>
-			<Button guid="HarmonyExtension" id="PostfixCommand" priority="0x0100" type="Button">
+			<Button guid="HarmonyExtension" id="AnnotatedPostfixCommand" priority="0x0100" type="Button">
 				<Parent guid="HarmonyExtension" id="HarmonyMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="Copy" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>Copy as Harmony Postfix...</ButtonText>
-					<LocCanonicalName>.HarmonyExtension.MyCommand</LocCanonicalName>
+					<ButtonText>Copy as Annotated Postfix...</ButtonText>
+					<LocCanonicalName>.HarmonyExtension.AnnotatedPostfix</LocCanonicalName>
+				</Strings>
+			</Button>
+		</Buttons>
+	
+	<Buttons>
+			<Button guid="HarmonyExtension" id="ManualPrefixCommand" priority="0x0100" type="Button">
+				<Parent guid="HarmonyExtension" id="HarmonyMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="Copy" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Copy as Manual Prefix...</ButtonText>
+					<LocCanonicalName>.HarmonyExtension.ManualPrefix</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="HarmonyExtension" id="ManualPostfixCommand" priority="0x0100" type="Button">
+				<Parent guid="HarmonyExtension" id="HarmonyMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="Copy" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Copy as Manual Postfix...</ButtonText>
+					<LocCanonicalName>.HarmonyExtension.ManualPostfix</LocCanonicalName>
 				</Strings>
 			</Button>
 		</Buttons>
 	</Commands>
 
 	<KeyBindings>
-		<KeyBinding guid="HarmonyExtension" id="PrefixCommand"
-					key1="K" mod1="Control Shift"
-					key2="P" mod2="Control Shift"
-					editor="guidVSStd97" />
-		<KeyBinding guid="HarmonyExtension" id="PostfixCommand"
-					key1="K" mod1="Control Shift"
-					key2="O" mod2="Control Shift"
-					editor="guidVSStd97" />
+		<KeyBinding guid="HarmonyExtension" id="AnnotatedPrefixCommand" key1="K" mod1="Control Shift" key2="P" mod2="Control Shift" editor="guidVSStd97" />
+		<KeyBinding guid="HarmonyExtension" id="AnnotatedPostfixCommand" key1="K" mod1="Control Shift" key2="O" mod2="Control Shift" editor="guidVSStd97" />
+		<KeyBinding guid="HarmonyExtension" id="ManualPrefixCommand" key1="K" mod1="Control Shift" key2="P" mod2="Control Shift" editor="guidVSStd97" />
+		<KeyBinding guid="HarmonyExtension" id="ManualPostfixCommand" key1="K" mod1="Control Shift" key2="O" mod2="Control Shift" editor="guidVSStd97" />
 	</KeyBindings>
 
 	<Symbols>
@@ -77,8 +94,10 @@
 			<IDSymbol name="HarmonyMainMenu" value="0x0001"/>
 			<IDSymbol name="HarmonyContextMenu" value="0x0002" />
 			<IDSymbol name="HarmonyMenuGroup" value="0x0010" />
-			<IDSymbol name="PrefixCommand" value="0x0100" />
-			<IDSymbol name="PostfixCommand" value="0x0101" />
+			<IDSymbol name="AnnotatedPrefixCommand" value="0x0100" />
+			<IDSymbol name="AnnotatedPostfixCommand" value="0x0101" />
+			<IDSymbol name="ManualPrefixCommand" value="0x0110" />
+			<IDSymbol name="ManualPostfixCommand" value="0x0111" />
 		</GuidSymbol>
 	</Symbols>
 </CommandTable>
