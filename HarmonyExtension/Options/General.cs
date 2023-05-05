@@ -17,11 +17,11 @@ namespace HarmonyExtension
     //https://www.vsixcookbook.com/recipes/settings-and-options.html
     public class General : BaseOptionModel<General>
     {
-        [Category("Harmony")]
-        [DisplayName("Manual Patch")]
-        [Description("If enabled AccessTools will be used to get the methods for manual patching.  If disabled annotations will be used")]
-        [DefaultValue(false)]
-        public bool ManualPatch { get; set; } = false;
+        //[Category("Harmony")]
+        //[DisplayName("Manual Patch")]
+        //[Description("If enabled AccessTools will be used to get the methods for manual patching.  If disabled annotations will be used")]
+        //[DefaultValue(false)]
+        //public bool ManualPatch { get; set; } = false;
 
         [Category("Harmony")]
         [DisplayName("NameOf")]

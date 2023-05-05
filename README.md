@@ -1,5 +1,9 @@
 # HarmonyExtension
-This is a Visual Studio extension that adds commands for copying a Harmony patch implementation to clipboard an IMethod or IProperty symbol.
+This is a Visual Studio extension that adds commands for copying a selected symbol as a Harmony patch, customized by the options.
+
+[Custom visibility context menu](https://stackoverflow.com/questions/37819010/how-to-customize-the-context-menu-in-the-solution-explorer-for-a-specific-projec)?
+
+
 
 ### Todo
 
@@ -23,7 +27,7 @@ This is a Visual Studio extension that adds commands for copying a Harmony patch
       *var patch = new HarmonyMethod(patchMethod);*
       *harmony.Patch(original, {{ (options.Postfix ? "postfix" : "prefix")}}: patch);*
 
-  * Anotations
+  * Annotations
 
     * Pre template:
       ***Annotations***

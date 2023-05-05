@@ -12,7 +12,7 @@ namespace HarmonyExtension
     /// </summary>
     internal sealed partial class PackageGuids
     {
-        public const string HarmonyExtensionString = "802359e0-57a5-4a96-b5c1-5b4a4532c99a";
+        public const string HarmonyExtensionString = "72771b20-fd24-4c2b-a5e9-4d9ef46b6f26";
         public static Guid HarmonyExtension = new Guid(HarmonyExtensionString);
     }
     /// <summary>
@@ -23,9 +23,11 @@ namespace HarmonyExtension
         public const int HarmonyMainMenu = 0x0001;
         public const int HarmonyContextMenu = 0x0002;
         public const int HarmonyMenuGroup = 0x0010;
+        public const int HarmonyContextMenuGroup = 0x0011;
         public const int AnnotatedPrefixCommand = 0x0100;
         public const int AnnotatedPostfixCommand = 0x0101;
         public const int ManualPrefixCommand = 0x0110;
         public const int ManualPostfixCommand = 0x0111;
+        public const int PasteCommand = 0x0120;
     }
 }

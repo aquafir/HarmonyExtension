@@ -1,4 +1,5 @@
-﻿using Microsoft;
+﻿using EnvDTE;
+using Microsoft;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -95,6 +96,23 @@ internal class HarmonyHandler
         }
     }
 
+    /// <summary>
+    /// Inserts a copied Harmony patch into the current document with context-aware replacements
+    /// </summary>
+    public async Task Button_InsertAsHarmony(HarmonyOptions harmonyOptions)
+    {
+        //https://stackoverflow.com/questions/71102005/vsix-exstension-how-to-paste-the-text-from-clipboard-to-the-environment
+        var template = "//Not yet implemented\r\n" + Clipboard.GetText();
+
+        DTE dte = Package.GetGlobalService(typeof(SDTE)) as DTE;
+        var d = dte.ActiveDocument;
+        TextSelection selectedText = (TextSelection)dte.ActiveDocument.Selection; // gets all the selected text (if not, it gets the current cursor)
+        selectedText.Insert(template); //Insert text
+    }
+
+    /// <summary>
+    /// Copy current symbol as a Harmony patch specified by extension and context options
+    /// </summary>
     public async Task Button_CopyAsHarmony(HarmonyOptions options)
     {
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -175,18 +193,30 @@ internal class HarmonyHandler
         var originalMethodName = (symbol.DeclaredAccessibility.HasFlag(Accessibility.Private) || !_options.PreferNameOf) ?
             $"\"{methodName}\"" : $"nameof({typeName}.{methodName})";
 
-        //What the generated method gets called
-        var methodDeclarationName = options.Postfix switch
+
+        var patchType = options.Type switch
         {
-            true when symbol.IsConstructor() => "PostCtor_" + methodName,
-            true when symbol.IsGetter() => "PostGet_" + methodName,
-            true when symbol.IsSetter() => "PostSet_" + methodName,
-            false when symbol.IsConstructor() => "PreCtor_" + methodName,
-            false when symbol.IsGetter() => "PreGet_" + methodName,
-            false when symbol.IsSetter() => "PreSet_" + methodName,
-            true => "Post" + methodName,
-            false => "Pre" + methodName,            
-        };           
+            PatchType.Postfix => "Post",
+            PatchType.Prefix => "Pre",
+        };
+
+        PatchTarget target = PatchTarget.Method;
+        if (symbol.IsConstructor())
+            target = PatchTarget.Constructor;
+        else if (symbol.IsGetter())
+            target = PatchTarget.Getter;
+        else if (symbol.IsSetter())
+            target = PatchTarget.Setter;
+        var patchTarget = target switch
+        {
+            PatchTarget.Constructor => "Ctor",
+            PatchTarget.Getter => "Get",
+            PatchTarget.Setter => "Set",
+            PatchTarget.Method => "",
+        };
+
+        //What the generated method gets called
+        var methodDeclarationName = patchType + patchTarget + methodName;
 
         //Optional injected parameters for method signature
         List<string> injections = new();
@@ -197,20 +227,20 @@ internal class HarmonyHandler
             injections.Add($"ref {symbol.ReturnType.GetFriendlyName()} __result");
 
         //Add either manual patching usage or annotations
-        if (_options.ManualPatch)
+        if (options.Style == PatchStyle.Manual)
         {
             sb.AppendLine(
                 $$"""
                 var original = AccessTools.Method(typeof({{typeName}}), {{originalMethodName}});
                 var patchMethod = AccessTools.Method(typeof(PatchClass), nameof(PatchClass.{{methodDeclarationName}}), {{harmonyParamSignature}});
                 var patch = new HarmonyMethod(patchMethod);
-                harmony.Patch(original, {{ (options.Postfix ? "postfix" : "prefix")}}: patch);
+                harmony.Patch(original, {{ (options.Type == PatchType.Postfix ? "postfix" : "prefix")}}: patch);
                 """);
         }
         else
         {
             //Patch type
-            sb.AppendLine(options.Postfix ? "[HarmonyPostfix]" : "[HarmonyPrefix]");
+            sb.AppendLine(options.Type == PatchType.Postfix ? "[HarmonyPostfix]" : "[HarmonyPrefix]");
 
             //Build annotations
             List<string> annotations = new() {
@@ -260,10 +290,10 @@ internal class HarmonyHandler
         //var parts = last.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
         //Harmony return
-        string returnType = options.Postfix || !_options.PreferOverride ? "void" : "bool";
+        string returnType = (options.Type == PatchType.Postfix || !_options.PreferOverride) ? "void" : "bool";
 
         //Boilerplate for the method
-        string bodyAndComments = options.Postfix || !_options.PreferOverride ?
+        string bodyAndComments = (options.Type == PatchType.Postfix || !_options.PreferOverride) ?
             "//Your code here" :
             """
             //Return false to override
