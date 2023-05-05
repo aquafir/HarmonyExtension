@@ -2,40 +2,38 @@
 
 namespace HarmonyExtension
 {
-    [Command(PackageIds.AnnotatedPrefixCommand)]
-    internal sealed class AnotatedPrefixCommand : BaseCommand<AnotatedPrefixCommand>
-    {
-        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
-        {
-            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Prefix = true });
-        }
-    }
-
     [Command(PackageIds.AnnotatedPostfixCommand)]
-    internal sealed class AnotatedPostfixCommand : BaseCommand<AnotatedPostfixCommand>
+    internal sealed class AnnotatedPostfixCommand : BaseCommand<AnnotatedPostfixCommand>
     {
-        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
-        {
-            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Postfix = true});
-        }
+        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e) => 
+            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Style = PatchStyle.Annotated, Type = PatchType.Postfix});
     }
 
-    [Command(PackageIds.ManualPrefixCommand)]
-    internal sealed class ManualPrefixCommand : BaseCommand<ManualPrefixCommand>
+    [Command(PackageIds.AnnotatedPrefixCommand)]
+    internal sealed class AnnotatedPrefixCommand : BaseCommand<AnnotatedPrefixCommand>
     {
-        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
-        {
-            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Prefix = true });
-        }
+        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e) =>
+            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions {  Style = PatchStyle.Annotated, Type = PatchType.Prefix});
     }
 
     [Command(PackageIds.ManualPostfixCommand)]
     internal sealed class ManualPostfixCommand : BaseCommand<ManualPostfixCommand>
     {
-        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
-        {
-            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Postfix = true });
-        }
+        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e) =>
+            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Style = PatchStyle.Manual, Type = PatchType.Postfix });
     }
 
+    [Command(PackageIds.ManualPrefixCommand)]
+    internal sealed class ManualPrefixCommand : BaseCommand<ManualPrefixCommand>
+    {
+        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e) =>
+            await HarmonyHandler.Instance.Button_CopyAsHarmony(new HarmonyOptions { Style = PatchStyle.Manual, Type = PatchType.Prefix });
+    }
+
+    [Command(PackageIds.HarmonyPasteCommand)]
+    internal sealed class HarmonyPasteCommand : BaseCommand<HarmonyPasteCommand>
+    {
+        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e) =>
+            await HarmonyHandler.Instance.Button_InsertAsHarmony(new HarmonyOptions {  });
+    }
 }

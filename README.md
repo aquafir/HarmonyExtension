@@ -23,7 +23,7 @@ This is a Visual Studio extension that adds commands for copying a Harmony patch
       *var patch = new HarmonyMethod(patchMethod);*
       *harmony.Patch(original, {{ (options.Postfix ? "postfix" : "prefix")}}: patch);*
 
-  * Anotations
+  * Annotations
 
     * Pre template:
       ***Annotations***

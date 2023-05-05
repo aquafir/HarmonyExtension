@@ -27,5 +27,6 @@ namespace HarmonyExtension
         public const int AnnotatedPostfixCommand = 0x0101;
         public const int ManualPrefixCommand = 0x0110;
         public const int ManualPostfixCommand = 0x0111;
+        public const int HarmonyPasteCommand = 0x0120;
     }
 }

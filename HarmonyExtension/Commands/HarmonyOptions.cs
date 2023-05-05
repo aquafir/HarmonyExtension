@@ -2,11 +2,25 @@
 
 internal class HarmonyOptions
 {
-    public bool Prefix { get; set; } = false;
-    public bool Postfix { get; set; } = false;
+    public PatchType Type { get; set; }
+    public PatchStyle Style { get; set; }
 }
 
 public enum PatchType
 {
     Prefix, Postfix
+}
+
+public enum PatchStyle
+{
+    Manual,
+    Annotated
+}
+
+public enum PatchTarget
+{
+    Constructor,
+    Getter,
+    Setter,
+    Method
 }
