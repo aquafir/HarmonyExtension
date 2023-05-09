@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HarmonyExtension;
 
-public static class Helpers {
+public static class ReflectionHelpers {
     //Todo: something better than hardcode: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/built-in-types?redirectedfrom=MSDN
     /// <summary>
     /// Map Types to the way they would appear in C#

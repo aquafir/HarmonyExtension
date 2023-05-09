@@ -47,7 +47,7 @@
   <ItemGroup>
     <Compile Include="Commands\HarmonyHandler.cs" />
     <Compile Include="Commands\HarmonyOptions.cs" />
-    <Compile Include="Helpers.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\TemplateOptionsPage.cs">
       <SubType>Component</SubType>
@@ -63,6 +63,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
+    <Compile Include="TemplateHelpers.cs" />
     <Compile Include="VSCommandTable.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -1,7 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using Template = HarmonyExtension.Template;
 
 namespace HarmonyExtension.Options
 {
@@ -18,20 +16,38 @@ namespace HarmonyExtension.Options
 
         public void Initialize()
         {
-            tbAttribute.Text = HarmonyExtension.Template.Instance.AttributeTemplate;
+            tbAttribute.Text = HarmonyExtension.Template.Instance.AnnotatedTemplate;
             tbManual.Text = HarmonyExtension.Template.Instance.ManualTemplate;
-            System.Windows.Forms.MessageBox.Show("Opened");
         }
 
         private void ManualTemplate_TextChanged(object sender, TextChangedEventArgs e)
         {
             HarmonyExtension.Template.Instance.ManualTemplate = tbManual.Text;
+            PreviewTemplate(tbManual.Text);
             HarmonyExtension.Template.Instance.Save();
         }
 
         private void AttributeTemplate_TextChanged(object sender, TextChangedEventArgs e)
         {
-            HarmonyExtension.Template.Instance.AttributeTemplate = tbAttribute.Text;
+            HarmonyExtension.Template.Instance.AnnotatedTemplate = tbAttribute.Text;
+            PreviewTemplate(tbAttribute.Text);
+            HarmonyExtension.Template.Instance.Save();
+        }
+
+        /// <summary>
+        /// Use default variables to preview the last modified template
+        /// </summary>
+        private void PreviewTemplate(string text)
+        {
+            lTemplatePreview.Content = text.PreviewTemplate();
+        }
+
+        private void ResetToDefaults_Click(object sender, RoutedEventArgs e)
+        {
+            HarmonyExtension.Template.Instance.AnnotatedTemplate = TemplateHelpers.AnnotatedTemplateDefault;
+            HarmonyExtension.Template.Instance.ManualTemplate = TemplateHelpers.ManualTemplateDefault;
+            tbAttribute.Text = HarmonyExtension.Template.Instance.AnnotatedTemplate;
+            tbManual.Text = HarmonyExtension.Template.Instance.ManualTemplate;
             HarmonyExtension.Template.Instance.Save();
         }
 

@@ -59,6 +59,18 @@ namespace HarmonyExtension
         [Description("Inject a reference to the return value")]
         [DefaultValue(true)]
         public bool AddResult { get; set; } = true;
+
+        [Category("Harmony")]
+        [DisplayName("Use Annotated Template")]
+        [Description("Uses template supplied in options for annotated patches")]
+        [DefaultValue(false)]
+        public bool UseAnnotatedTemplate { get; set; } = false;
+
+        [Category("Harmony")]
+        [DisplayName("Use Manual Template")]
+        [Description("Uses template supplied in options for manual patches")]
+        [DefaultValue(false)]
+        public bool UseManualTemplate { get; set; } = false;
     }
 
     //Custom options UI for templates: https://www.vsixcookbook.com/recipes/settings-and-options.html#Walkthrough-Create-individual-Options-with-Checkboxes
@@ -67,23 +79,13 @@ namespace HarmonyExtension
         [Category("Template")]
         [DisplayName("Manual Template")]
         [Description("Template used for manual patching.")]
-        [DefaultValue("")]
-        public string ManualTemplate { get; set; } = $$"""
-            public static returnType methodDeclarationName(formattedParams) {
-            bodyAndComments
-            }
-            """;
+        [DefaultValue(TemplateHelpers.AnnotatedTemplateDefault)]
+        public string ManualTemplate { get; set; } 
 
         [Category("Template")]
         [DisplayName("Attribute Template")]
         [Description("Template used for attribute-based patching.")]
-        [DefaultValue("")]
-        public string AttributeTemplate { get; set; } = $$"""
-            public static returnType methodDeclarationName(formattedParams) {
-            bodyAndComments
-            }
-            """;
-
-
+        [DefaultValue(TemplateHelpers.ManualTemplateDefault)]
+        public string AnnotatedTemplate { get; set; } 
     }
 }

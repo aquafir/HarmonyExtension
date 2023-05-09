@@ -95,9 +95,9 @@
 		<!--<CommandPlacement guid="HarmonyExtension" id="HarmonyMenuGroup" priority="0x07FF">
 			<Parent guid="HarmonyExtension" id="HarmonyContextMenu" />
 		</CommandPlacement>-->
-		<!--<CommandPlacement guid="HarmonyExtension" id="HarmonyMenuGroup" priority="0x07FF">
+		<CommandPlacement guid="HarmonyExtension" id="HarmonyMenuGroup" priority="0x07FF">
 			<Parent guid="HarmonyExtension" id="HarmonyMainMenu" />
-		</CommandPlacement>-->
+		</CommandPlacement>
 	</CommandPlacements>
 
 	<!--<KeyBindings>

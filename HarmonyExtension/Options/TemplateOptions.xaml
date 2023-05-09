@@ -9,10 +9,12 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="150" />
-            <RowDefinition Height="150" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="20" />
         </Grid.RowDefinitions>
-        <Label>Testing I guess.  This is where the template will be explained.</Label>
+        <!--<Label>Testing I guess.  This is where the template will be explained.</Label>-->
         <TextBox 
                 x:Name="tbManual" 
                 Grid.Row="1"
@@ -30,5 +32,7 @@
                 AcceptsReturn="True"
                 TextWrapping="Wrap"
                 TextChanged="AttributeTemplate_TextChanged"/>
+        <Label x:Name="lTemplatePreview" Grid.Row="3" Margin="5" ScrollViewer.VerticalScrollBarVisibility="Auto" Content="Previews last modified template" />
+        <Button Grid.Row="4" HorizontalAlignment="Left" Width="120" Content="Restore Defaults" Click="ResetToDefaults_Click"></Button>
     </Grid>
 </UserControl>
