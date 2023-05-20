@@ -30,7 +30,7 @@ namespace HarmonyExtension
         public bool PreferNameOf { get; set; } = true;
 
         [Category("Harmony")]
-        [DisplayName("Override")]
+        [DisplayName("Bool Prefix")]
         [Description("Defaults to using bool prefixes that can override the method")]
         [DefaultValue(true)]
         public bool PreferOverride { get; set; } = true;
@@ -46,6 +46,12 @@ namespace HarmonyExtension
         [Description("Include annotations for empty parameter lists")]
         [DefaultValue(false)]
         public bool IncludeEmptyParameterAnnotation { get; set; } = false;
+
+        [Category("Harmony")]
+        [DisplayName("Always Add ArgumentType[]")]
+        [Description("Include annotations for argument types when none are ref|out|pointer")]
+        [DefaultValue(false)]
+        public bool IncludeArgumentTypeAnnotation { get; set; } = false;
 
         //Injections: https://harmony.pardeike.net/articles/patching-injections.html
         [Category("Harmony")]

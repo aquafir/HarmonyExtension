@@ -9,7 +9,7 @@ public static class ReflectionHelpers {
     /// <summary>
     /// Map Types to the way they would appear in C#
     /// </summary>
-    public static string GetFriendlyName(this ISymbol symbol) => symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);   
+    public static string GetFriendlyName(this ISymbol symbol) => symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
     //      => {
     //    symbol.Name switch {        
     //    "Boolean" => "bool",
@@ -31,6 +31,25 @@ public static class ReflectionHelpers {
     //    "Object" => "object",
     //    _ => symbol.Name,
     //};
+
+    public static string GetHarmonyArgumentType(this IParameterSymbol p) => p.RefKind switch
+    {
+        //_ when p is IPointerTypeSymbol => "ArgumentType.Pointer", //todo: find preferred way for checking if this is a pointer
+        _ when p.Type.ToString().Contains("*") => "ArgumentType.Pointer",
+        RefKind.None => "ArgumentType.Normal",
+        RefKind.Ref => "ArgumentType.Ref",
+        RefKind.Out => "ArgumentType.Out",
+        RefKind.In => "ArgumentType.Ref",    //todo: verify this, equal to RedKind.RefReadOnly
+    };
+    public static bool RequiresHarmonyArgumentType(this IParameterSymbol p) => p.RefKind switch
+    {
+        //_ when p is IPointerTypeSymbol => true,
+        _ when p.Type.ToString().Contains("*") => true,
+        RefKind.None => false,
+        RefKind.Ref => true,
+        RefKind.Out => true,
+        RefKind.In => true,
+    };
 
     public static string GetHarmonyName(this IMethodSymbol symbol) => symbol switch {
         _ when symbol.IsGetter() => symbol.Name.Substring(4),

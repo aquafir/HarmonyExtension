@@ -11,6 +11,7 @@ This is a Visual Studio extension that adds commands for copying a selected symb
 
     * `Annotations`	[HarmonyPatch(typeof(TypeName), nameof(TypeName.MyMethod), MethodType.Getter), new Type[] { typeof(string) }]
     * `AnnotatedPatchType`	[HarmonyPrefix]
+    * `HarmonyArgumentTypes`new ArgumentType[] { ArgumentType.Normal }
     * `HarmonyMethodName`	nameof(TypeName.MyMethod)
     * `HarmonyParamSignature`	new Type[] { typeof(string) }
     * `ManualPatchType`	prefix
@@ -21,9 +22,9 @@ This is a Visual Studio extension that adds commands for copying a selected symb
     * `PatchType`	Prefix
     * `ReturnType`	bool
     * `TypeName`	TypeName
-
+  
   * Default Manual Template
-
+  
     > var originalMethod = AccessTools.Method(typeof(\$typeName), \$methodName);
     > var patchMethod = AccessTools.Method(typeof(PatchClass), nameof(PatchClass.\$methodDeclarationName), \$harmonyParamSignature);
     > var patch = new HarmonyMethod(patchMethod);
@@ -38,9 +39,9 @@ This is a Visual Studio extension that adds commands for copying a selected symb
     > //Return true to execute original
     > //return true;
     > }
-
+  
   * Default  Annotated Template
-
+  
     > \$annotatedPatchType
     > \$annotations
     > public static \$returnType  \$methodDeclarationName(\$methodSignature) {

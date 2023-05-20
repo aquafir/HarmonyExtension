@@ -208,6 +208,11 @@ internal class HarmonyHandler
         var harmonyParamSignature = $"new Type[] {{ {String.Join(",", parameters.Select(p => $"typeof({p.Type.GetFriendlyName()})"))} }}";
         substitutions.Add(TemplateName.HarmonyParamSignature, harmonyParamSignature);
 
+        //ArgumentTypes to match Type array
+        var requiresArgumentTypes = parameters.Any(p => p.RequiresHarmonyArgumentType());
+        var harmonyArgumentTypes = $"new ArgumentType[] {{ {String.Join(",", parameters.Select(p => p.GetHarmonyArgumentType()))} }}";
+        //substitutions.Add(TemplateName.HarmonyArgumentTypes, harmonyArgumentTypes);   //Added conditionally
+
         //Method name, using nameof if accessible and preferred in options
         var harmonyMethodName = (symbol.DeclaredAccessibility.HasFlag(Accessibility.Private) || !generalOptions.PreferNameOf) ?
             $"\"{methodName}\"" : $"nameof({typeName}.{methodName})";
@@ -251,7 +256,8 @@ internal class HarmonyHandler
         //Add either manual patching usage or annotations
         if (options.Style == PatchStyle.Manual)
         {
-            var manualPatchType = options.Type switch {
+            var manualPatchType = options.Type switch
+            {
                 PatchType.Prefix => "prefix",
                 PatchType.Postfix => "postfix"
             };
@@ -268,7 +274,8 @@ internal class HarmonyHandler
         else
         {
             //Patch type
-            var annotatedPatchType = options.Type switch {
+            var annotatedPatchType = options.Type switch
+            {
                 PatchType.Prefix => "[HarmonyPrefix]",
                 PatchType.Postfix => "[HarmonyPostfix]"
             };
@@ -299,6 +306,12 @@ internal class HarmonyHandler
             else if (generalOptions.IncludeEmptyParameterAnnotation && !(symbol.IsGetter() || symbol.IsSetter()))
                 annotations.Add($"{harmonyParamSignature}");
 
+            //Add parallel ArgumentType array if needed / requested
+            if (requiresArgumentTypes || generalOptions.IncludeArgumentTypeAnnotation)
+            {
+                annotations.Add(harmonyArgumentTypes);
+                substitutions.Add(TemplateName.HarmonyArgumentTypes, harmonyArgumentTypes);
+            }
 
             string templateAnnotations = "";
             if (generalOptions.UseSeparateAnnotations)

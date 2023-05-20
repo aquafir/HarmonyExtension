@@ -31,6 +31,7 @@ public static class TemplateHelpers
         [TemplateName.AnnotatedPatchType] = "[HarmonyPrefix]",
         [TemplateName.HarmonyMethodName] = "nameof(TypeName.MyMethod)",
         [TemplateName.HarmonyParamSignature] = "new Type[] { typeof(string) }",
+        [TemplateName.HarmonyArgumentTypes] = "new ArgumentType[] { ArgumentType.Normal }",
         [TemplateName.ManualPatchType] = "prefix",
         [TemplateName.MethodDeclarationName] = "PrefixGetMyMethod",
         [TemplateName.MethodName] = "MyMethod",
@@ -85,4 +86,5 @@ public enum TemplateName
     PatchType,              //Prefix|Postfix
     ReturnType,             //void|bool
     TypeName,               //TypeName.MyMethod
+    HarmonyArgumentTypes,
 }
