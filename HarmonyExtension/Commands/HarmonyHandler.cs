@@ -247,7 +247,7 @@ internal class HarmonyHandler
 
         //Optional injected parameters for method signature
         List<string> injections = new();
-        if (generalOptions.AddInstance)
+        if (generalOptions.AddInstance && !symbol.ContainingType.IsStatic)
             injections.Add($"ref {typeName} __instance");
 
         if (generalOptions.AddResult && !symbol.ReturnsVoid) //options.Postfix && 
