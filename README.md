@@ -26,30 +26,46 @@ This is a Visual Studio extension that adds commands for copying a selected symb
   * Default Manual Template
   
     > var originalMethod = AccessTools.Method(typeof(\$typeName), \$methodName);
+    > 
     > var patchMethod = AccessTools.Method(typeof(PatchClass), nameof(PatchClass.\$methodDeclarationName), \$harmonyParamSignature);
+    > 
     > var patch = new HarmonyMethod(patchMethod);
+    > 
     > harmony.Patch(original, $manualPatchType: patch);
     >
     > 
     >
     > public static \$returnType  \$methodDeclarationName(\$methodSignature) {
+    > 
     > //Return false to override
+    > 
     > //return false;
-    >
+    > 
+    > 
     > //Return true to execute original
+    > 
     > //return true;
+    > 
     > }
   
   * Default  Annotated Template
   
     > \$annotatedPatchType
+    > 
     > \$annotations
+    > 
     > public static \$returnType  \$methodDeclarationName(\$methodSignature) {
+    > 
     > //Return false to override
+    > 
     > //return false;
-    >
+    > 
+    > 
+    > 
     > //Return true to execute original
+    > 
     > //return true;
+    > 
     > }
 
 
@@ -58,7 +74,7 @@ This is a Visual Studio extension that adds commands for copying a selected symb
 
 * Templating
   * Add support for context-aware insertions (e.g., template variables for destination Type)
-  * Better xaml design
+  * Better template settings design
   * Conditionals / templates for each combination of:
     * Return type
     * Type
@@ -75,7 +91,7 @@ This is a Visual Studio extension that adds commands for copying a selected symb
   * Add default values?
   * Annotations
     * [Categories](https://harmony.pardeike.net/articles/annotations.html#basic-annotations)
-    * [Argument](https://harmony.pardeike.net/articles/annotations.html#basic-annotations)
+    * ~~[Argument](https://harmony.pardeike.net/articles/annotations.html#basic-annotations)~~
     * [Generics](https://harmony.pardeike.net/articles/annotations.html#generic-methods)
   * [Priority](https://harmony.pardeike.net/articles/priorities.html)
   * Patch types
